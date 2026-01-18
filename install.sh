@@ -32,6 +32,7 @@ fi
 echo "Instalando binário SayHi em /usr/local/bin..."
 doas cp target/release/sayhi /usr/local/bin/
 doas chmod 755 /usr/local/bin/sayhi
+doas chmod +x /usr/local/bin/sayhi
 
 # --------------------------------------------------------------------------
 # Configuração do wrapper PAM
