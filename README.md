@@ -1,38 +1,40 @@
-# SayHi Linux — Autenticação Facial
+# SayHi
 
-**Versão:**  Experimental
-**Propósito:** Projeto de estudo pessoal; **não recomendado para produção**.  
-**Plataformas testadas:** Alpine Linux (primário), compilável em Debian/Ubuntu, Fedora e Arch Linux.  
+**Autenticação facial experimental via terminal para Linux (foco inicial em Alpine)**
 
----
+SayHi é um projeto pessoal de aprendizado que implementa um sistema rudimentar de autenticação facial usando apenas webcam comum e Rust.
 
-## ⚠ Avisos Importantes
+**Status atual:** Pré-alpha / Prova de conceito  
+**Tempo de desenvolvimento até aqui:** ~10 dias  
+**Objetivo principal:** Estudo e experimentação com visão computacional + autenticação em Linux
 
-* **Segurança:** Este projeto não fornece nível satisfatório de segurança para ambientes críticos.  
-* **Uso:** Apenas para testes, aprendizado e estudo pessoal.  
-* Alterações no PAM podem exigir restauração manual.  
-* A autenticação do usuário `root` não é suportada.  
-* Interface exclusivamente via terminal.  
-* Suporte limitado a webcams compatíveis.
+**AVISO MUITO IMPORTANTE – NÃO USE EM PRODUÇÃO NEM EM AMBIENTES REAIS**
 
----
+Este projeto **não oferece segurança mínima** para autenticação.  
+Ele foi criado como material de estudo e demonstração de conceitos básicos.
 
-## Estrutura do Sistema
+Principais limitações de segurança atuais:
+- Sem detecção real de rosto (processa a imagem inteira)
+- Sem alinhamento facial (ângulos diferentes = falha)
+- Sem detecção de vivacidade/liveness (foto, vídeo ou máscara burlam facilmente)
+- Comparação muito simples e suscetível a variações de iluminação
+- Templates armazenados em JSON puro (sem criptografia)
+- Integração com PAM experimental
 
-| Item | Caminho / Descrição |
-|------|--------------------|
-| Binário principal | `/usr/local/bin/sayhi` |
-| Wrapper PAM | `/usr/local/lib/security/pam_sayhi.sh` |
-| Dados do usuário | `~/.local/share/sayhilinux/` |
-| Logs | `/var/log/sayhi.log` |
-| Polkit PAM | `/etc/pam.d/polkit-1` (linha adicionada: `auth sufficient pam_exec.so quiet /usr/local/lib/security/pam_sayhi.sh`) |
+**NUNCA** utilize este software como método de autenticação real. 
+É mais frágil do que uma senha de 4 dígitos.
 
----
+## Recursos atuais (o que já funciona... mais ou menos)
 
-## Instalação e Pré-requisitos
+- Captura de vídeo da webcam (MJPG/YUYV)
+- Criação de "template" facial simples via binarização adaptativa
+- Cadastro (enroll) com múltiplas poses/sessões
+- Autenticação básica via terminal
+- Suporte experimental a PAM (via pam_exec)
+- Bloqueio temporário após falhas (rudimentar)
+- Teste rápido de câmera
 
-1. Usuário deve ter permissões administrativas via `doas` ou `sudo`.  
-2. Instalar dependências de acordo com a distribuição:
+## Instalar dependências de acordo com a distribuição:
    * **Alpine Linux:**  
      ```sh
      doas apk add rust cargo v4l-utils v4l-utils-dev jpeg-dev libpng-dev musl-dev clang llvm make linux-headers linux-pam
@@ -51,50 +53,56 @@
      sudo pacman -Syu --needed rust v4l-utils libjpeg-turbo libpng clang llvm make linux-headers pam
      ```
 
-3. Compilar o projeto:
-   ```sh
-   mkdir -p ~/sayhilinux/src
-   cd ~/sayhilinux
-   cargo build --release
+## Instalação (método atual – manual)
+
+```bash
+git clone https://github.com/SEU_USUARIO/sayhi.git
+cd sayhi
+
+# Compilar com otimizações para tamanho
+cargo build --release
+
+# Instalar (exemplo)
+sudo cp target/release/sayhi /usr/local/bin/
+sudo chmod +x /usr/local/bin/sayhi
 ```
 
-4. Instalar binário e configurar wrapper PAM:
+## Comandos disponíveis
 
-   ```sh
-   doas cp target/release/sayhi /usr/local/bin/
-   doas chmod 755 /usr/local/bin/sayhi
-   doas mkdir -p /usr/local/lib/security
-   # Criar pam_sayhi.sh conforme exemplo de instalação
-   doas chmod 755 /usr/local/lib/security/pam_sayhi.sh
-   ```
-
-5. Integrar com Polkit (opcional):
-
-   ```sh
-   doas sed -i '/^auth.*pam_env.so/a auth sufficient pam_exec.so quiet /usr/local/lib/security/pam_sayhi.sh' /etc/pam.d/polkit-1
-   ```
-
----
-
-## Testes Básicos
-
-```sh
-sayhi test           # Testa webcam
-sayhi enroll $USER   # Cadastra rosto
-sayhi auth $USER     # Testa autenticação
+```bash
+sayhi test                    # Testa a câmera e salva imagem de exemplo
+sayhi enroll seu_usuario      # Cadastra rosto (3 sessões recomendadas)
+sayhi auth [seu_usuario]      # Tenta autenticar (usa PAM_USER se disponível)
 ```
 
-> Substitua `$USER` pelo usuário alvo.
+## Integração experimental com PAM (use com extremo cuidado!)
 
----
+Faça backup antes de qualquer alteração!
 
-## Logs e Armazenamento
+Exemplo básico (apenas terminal/login – NÃO funciona bem com GDM/SDDM):
 
-* Logs: `/var/log/sayhi.log`
-* Dados do usuário: `~/.local/share/sayhilinux/`
-* Wrapper PAM: `/usr/local/lib/security/pam_sayhi.sh`
+```bash
+# Backup importante!
+sudo cp /etc/pam.d/login /etc/pam.d/login.bak-$(date +%F)
 
----
+# Adicione no início do arquivo /etc/pam.d/login (depois do pam_securetty se existir)
+auth       sufficient   pam_exec.so quiet /usr/local/bin/sayhi auth
+```
 
-**Resumo:**
-SayHi Linux é um projeto experimental de autenticação facial via terminal. **Não use em produção.** Ideal para aprendizado sobre PAM, Polkit e integração de autenticação facial em Linux.
+**Observações reais sobre PAM:**
+- Ordem importa muito (colocar no início pode quebrar o login)
+- Atualmente instável em Alpine + display managers
+- Não suporta root (por escolha de segurança)
+
+
+## Do projeto
+
+"SayHi" existe para aprender:  
+Rust + visão computacional + integração low-level com Linux + limitações reais de segurança em biometria.
+
+Se você chegou até aqui:  
+Parabéns pela curiosidade!  
+Mas por favor, use com consciência — biometria facial sem hardware dedicado e algoritmos modernos é mais teatro do que segurança.
+
+```
+
