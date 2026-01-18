@@ -5,7 +5,6 @@
 SayHi é um projeto pessoal de aprendizado que implementa um sistema rudimentar de autenticação facial usando apenas webcam comum e Rust.
 
 **Status atual:** Pré-alpha / Prova de conceito  
-**Tempo de desenvolvimento até aqui:** ~10 dias  
 **Objetivo principal:** Estudo e experimentação com visão computacional + autenticação em Linux
 
 **AVISO MUITO IMPORTANTE – NÃO USE EM PRODUÇÃO NEM EM AMBIENTES REAIS**
@@ -105,4 +104,3 @@ Parabéns pela curiosidade!
 Mas por favor, use com consciência — biometria facial sem hardware dedicado e algoritmos modernos é mais teatro do que segurança.
 
 ```
-
