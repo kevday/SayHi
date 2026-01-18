@@ -78,7 +78,7 @@ sayhi auth [seu_usuario]      # Tenta autenticar (usa PAM_USER se disponível)
 
 Faça backup antes de qualquer alteração!
 
-Exemplo básico (apenas terminal/login – NÃO funciona bem com GDM/SDDM):
+Exemplo básico (apenas terminal/login – no Alpine Linux NÃO funciona bem com GDM/SDDM):
 
 ```bash
 # Backup importante!
