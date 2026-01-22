@@ -84,9 +84,9 @@ esac
 # --------------------------------------------------------------------------
 # Preparação do projeto e compilação
 # --------------------------------------------------------------------------
-echo "Criando diretório do projeto em ~/sayhilinux/src..."
-mkdir -p ~/sayhilinux/src
-cd ~/sayhilinux
+echo "Criando diretório do projeto em ~/SayHi/src..."
+mkdir -p ~/SayHi/src
+cd ~/SayHi
 
 echo "Compilando o binário SayHi..."
 cargo build --release
